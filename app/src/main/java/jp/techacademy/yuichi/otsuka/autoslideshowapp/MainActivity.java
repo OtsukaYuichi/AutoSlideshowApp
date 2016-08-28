@@ -34,18 +34,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        Button buttonSusumu = (Button) findViewById(R.id.bTsusumu);
-        buttonSusumu.setOnClickListener(this);
-
-        Button buttonStopRun = (Button) findViewById(R.id.bTstoprun);
-        buttonStopRun.setOnClickListener(this);
-
-        Button buttonModoru = (Button) findViewById(R.id.bTmodoru);
-        buttonModoru.setOnClickListener(this);
-
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             // Android 6用
             if (checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
+                Button buttonSusumu = (Button) findViewById(R.id.bTsusumu);
+                Button buttonStopRun = (Button) findViewById(R.id.bTstoprun);
+                Button buttonModoru = (Button) findViewById(R.id.bTmodoru);
+                buttonSusumu.setOnClickListener(this);
+                buttonStopRun.setOnClickListener(this);
+                buttonModoru.setOnClickListener(this);
+
                 getContentsInfo();
             } else {
                 requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, PERMISSIONS_REQUEST_CODE);
@@ -73,7 +71,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private void goNext() {
         NUMBEROFCURRENTIMAGECONTENTS++;
-        if (NUMBEROFCURRENTIMAGECONTENTS > NUMBEROFWHOLEIMAGECONTENTS) {
+        if (NUMBEROFCURRENTIMAGECONTENTS >= NUMBEROFWHOLEIMAGECONTENTS) {
             NUMBEROFCURRENTIMAGECONTENTS = 0;
         }
         dispImage();
@@ -137,7 +135,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private void goPrev() {
         NUMBEROFCURRENTIMAGECONTENTS--;
         if (NUMBEROFCURRENTIMAGECONTENTS < 0) {
-            NUMBEROFCURRENTIMAGECONTENTS = NUMBEROFWHOLEIMAGECONTENTS;
+            NUMBEROFCURRENTIMAGECONTENTS = NUMBEROFWHOLEIMAGECONTENTS - 1;
         }
         dispImage();
     }
@@ -162,6 +160,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             case PERMISSIONS_REQUEST_CODE:
                 if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     Log.d("showAppp", "ファイルへのアクセスが許可された");
+                    Button buttonSusumu = (Button) findViewById(R.id.bTsusumu);
+                    Button buttonStopRun = (Button) findViewById(R.id.bTstoprun);
+                    Button buttonModoru = (Button) findViewById(R.id.bTmodoru);
+
+                    buttonSusumu.setOnClickListener(this);
+                    buttonStopRun.setOnClickListener(this);
+                    buttonModoru.setOnClickListener(this);
+
                     getContentsInfo();
                 } else {
                     Log.d("showAppp", "ファイルへのアクセスが許可されない");
@@ -173,10 +179,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void getContentsInfo() {
+        NUMBEROFWHOLEIMAGECONTENTS = 0;
         ContentResolver resolver = getContentResolver();
         Cursor cursor = resolver.query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, null, null, null, null);
-        NUMBEROFWHOLEIMAGECONTENTS = cursor.getColumnCount();
-        Log.d("showAppp", "NUMBEROFWHOLEIMAGECONTENTS s = " + String.valueOf(NUMBEROFWHOLEIMAGECONTENTS));
 
         if (cursor.moveToFirst()) {
             int fieldIndex = cursor.getColumnIndex(MediaStore.Images.Media._ID);
@@ -185,7 +190,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             Uri imageUri = ContentUris.withAppendedId(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, id);
             ImageView imageVIew = (ImageView) findViewById(R.id.imageView);
             imageVIew.setImageURI(imageUri);
+
+            do {
+                NUMBEROFWHOLEIMAGECONTENTS++;
+            } while (cursor.moveToNext());
+
         }
         cursor.close();
+        Log.d("showAppp", "NUMBEROFWHOLEIMAGECONTENTS s = " + String.valueOf(NUMBEROFWHOLEIMAGECONTENTS));
     }
 }
