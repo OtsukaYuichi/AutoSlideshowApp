@@ -50,6 +50,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             }
         } else {
             // Android 5用
+            Button buttonSusumu = (Button) findViewById(R.id.bTsusumu);
+            Button buttonStopRun = (Button) findViewById(R.id.bTstoprun);
+            Button buttonModoru = (Button) findViewById(R.id.bTmodoru);
+            buttonSusumu.setOnClickListener(this);
+            buttonStopRun.setOnClickListener(this);
+            buttonModoru.setOnClickListener(this);
+
             getContentsInfo();
         }
 
